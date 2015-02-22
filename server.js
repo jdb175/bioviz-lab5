@@ -14,7 +14,7 @@ app.get('/points', function (req, res) {
 	});
 
 	connection.connect();
-	//just using the give ranges
+	//just using the given ranges
 	var minTemp = req.query.minTemp == undefined ? '2.2' : req.query.minTemp;
 	var maxTemp = req.query.maxTemp == undefined ? '33.0' : req.query.maxTemp;
 	var minHumidity = req.query.minHumidity == undefined ? '15' : req.query.minHumidity;
@@ -27,7 +27,7 @@ app.get('/points', function (req, res) {
 	" and Humidity between " + minHumidity + " and " + maxHumidity + 
 	" and Wind between " + minWind + " and " + maxWind; // Example sql = "select * from " + table_name + " where Temp > " + minTemp;
 
-	console.log(query);
+	console.log("GET " + query);
 
 	connection.query(query, function(err, rows, fields) {
 		if (err) throw err;
@@ -42,6 +42,6 @@ var server = app.listen(3000, function () {
   var host = server.address().address
   var port = server.address().port
 
-  console.log('Example app listening at http://%s:%s', host, port)
+  console.log('ForestFire Queryer listening at http://%s:%s', host, port)
 
 })

@@ -1,19 +1,86 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
-<style>
-</style>
+<head>
+  <link rel="stylesheet" href="jquery.range.css">
+  <style>
+  .slider-container {
+    height: 50px;
+  }
+  </style>
+</head>
 <body>
   <svg></svg>
+  <input type = "hidden" class="range-temp" value="2.2,33"/>
+  <input type = "hidden" class="range-humidity" value="15,100"/>
+  <input type = "hidden" class="range-wind" value="0.4,9.4"/>
+  <script src="//code.jquery.com/jquery-1.11.2.min.js"></script>
+  <script src="/jquery.range-min.js"></script>
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script>
     var width = 800;
     var height = 800;
     var margin = { left: 20, right:20, top:20, bottom: 20};
     var svg = d3.select("svg").attr("width", width).attr("height", height)
+    var minTemp = 2.2;
+    var maxTemp = 33;
+    var minHumidity = 15;
+    var maxHumidity = 100;
+    var minWind = 0.4;
+    var maxWind = 9.4;
 
     updateData();
+
+    $('.range-temp').jRange({
+      from: 2.2,
+      to: 33,
+      step: 0.1,
+      width: 300,
+      isRange : true,
+      onstatechange: tempChanged
+    });
+
+    $('.range-humidity').jRange({
+      from: 15,
+      to: 100,
+      step: 0.1,
+      width: 300,
+      isRange : true,
+      onstatechange: humidityChanged
+    });
+
+    $('.range-wind').jRange({
+      from: 0.4,
+      to: 9.4,
+      step: 0.1,
+      width: 300,
+      isRange : true,
+      onstatechange: windChanged
+    });
+
+    function tempChanged(obj, value) {
+      var values = value.split(",");
+      minTemp = values[0];
+      maxTemp = values[1];
+      updateData();
+    }
+
+    function humidityChanged(obj, value) {
+      var values = value.split(",");
+      minHumidity = values[0];
+      maxHumidity = values[1];
+      updateData();
+    }
+
+    function windChanged(obj, value) {
+      var values = value.split(",");
+      minWind = values[0];
+      maxWind = values[1];
+      updateData();
+    }
+
+    /** Queries database and displays points **/
     function updateData() {
-      d3.json("/points")
+      d3.json("/points?minTemp="+minTemp+"&maxTemp="+maxTemp+"&minWind="+minWind+"&maxWind="+maxWind+"&minHumidity="+minHumidity+"&maxHumidity="+maxHumidity)
       .header("Content-Type", "application/json")
       .get(function(error, data) {
         // callback
@@ -53,14 +120,16 @@
 
         //append circles
         var circ = svg.selectAll("circle")
-          .data(data, function(d) { return d.id; })
+          .data(data, function(d) { return d.X +"/"+ d.Y; })
         circ.enter()
           .append("circle")
           .attr("cx", function(d) { return xScale(d.X); })
           .attr("cy", function(d) { return yScale(d.Y); })
           .attr("fill", "lightcoral")
-          .attr("r", function(d) {return Math.pow(d.weight, 0.5) * 2});
-        circ.exit().remove();
+          .attr("r", 0);
+        circ.transition()
+          .attr("r", function(d) {return 5 + Math.pow(d.weight, 0.5)});
+        circ.exit().transition().attr("r", 0).remove();
       });
     }
   </script>

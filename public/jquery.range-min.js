@@ -227,12 +227,7 @@
 			var label = $('.pointer-label', this.domNode)[pointer.hasClass('low') ? 'first' : 'last']();
 			var text;
 			var value = this.positionToValue(position);
-			if ($.isFunction(this.options.format)) {
-				var type = this.isSingle() ? undefined : (pointer.hasClass('low') ? 'low' : 'high');
-				text = this.options.format(value, type);
-			} else {
-				text = this.options.format.replace('%s', value);
-			}
+			text = value.toFixed(2);
 
 			var width = label.html(text).width(),
 				left = position - width / 2;

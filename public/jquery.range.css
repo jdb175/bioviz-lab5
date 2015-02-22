@@ -79,13 +79,13 @@
 .theme-green .back-bar .selected-bar {
   border-radius: 2px;
   background-color: #a1fad0;
-  background-image: -moz-linear-gradient(top, #bdfade, #76fabc);
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#bdfade), to(#76fabc));
-  background-image: -webkit-linear-gradient(top, #bdfade, #76fabc);
-  background-image: -o-linear-gradient(top, #bdfade, #76fabc);
-  background-image: linear-gradient(to bottom, #bdfade, #76fabc);
+  background-image: -moz-linear-gradient(top, lightcoral, coral);
+  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(lightcoral), to(coral));
+  background-image: -webkit-linear-gradient(top, lightcoral, coral);
+  background-image: -o-linear-gradient(top, lightcoral, coral);
+  background-image: linear-gradient(to bottom, lightcoral, coral);
   background-repeat: repeat-x;
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffbdfade', endColorstr='#ff76fabc', GradientType=0);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='lightcoral', endColorstr='coral', GradientType=0);
 }
 .theme-green .back-bar .pointer {
   width: 14px;

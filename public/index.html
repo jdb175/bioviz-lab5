@@ -2,7 +2,39 @@
 <meta charset="utf-8">
 <head>
   <link rel="stylesheet" href="jquery.range.css">
+  <title>Lab 5: Database Connection</title>
   <style>
+  .tooltip {
+    padding: 8px;
+    background: #F08080;
+    color: #fff;
+    opacity: 80%;
+    border-radius: 2px;
+    font-family: 'Helvetica Neue', sans-serif;
+    font-size: 11px;
+  }
+  .tooltip:after, .tooltip:before {
+    right: 100%;
+    top: 50%;
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    opacity: 80%;
+  }
+
+  .tooltip:after {
+    border-color: rgba(0, 0, 0, 0);
+    border-right-color: #F08080;
+    border-width: 4px;
+    margin-top: -4px;
+  }
+  .tooltip:before {
+    border-width: 7px;
+    margin-top: -7px;
+  }
   .slider-container {
     -webkit-user-select:none;
     -khtml-user-select:none;
@@ -41,6 +73,11 @@
   <script src="/jquery.range-min.js"></script>
   <script src="http://d3js.org/d3.v3.min.js"></script>
   <script>
+    d3.selection.prototype.moveToFront = function() {
+      return this.each(function(){
+        this.parentNode.appendChild(this);
+      });
+    };
     var width = 800;
     var height = 800;
     var margin = { left: 20, right:20, top:20, bottom: 20};
@@ -52,8 +89,18 @@
     var minWind = 0.4;
     var maxWind = 9.4;
 
+    //initialize data
     updateData();
 
+    //Create tooltip
+    var tooltip = d3.select("body")
+          .append("div")
+          .style("position", "absolute")
+          .style("z-index", "10")
+          .style("visibility", "hidden")
+          .attr("class", "tooltip");
+
+    //Initialize sliders
     $('.range-temp').jRange({
       from: 2.2,
       to: 33,
@@ -81,26 +128,13 @@
       onstatechange: windChanged
     });
 
-    function tempChanged(obj, value) {
-      var values = value.split(",");
-      minTemp = values[0];
-      maxTemp = values[1];
-      updateData();
-    }
-
-    function humidityChanged(obj, value) {
-      var values = value.split(",");
-      minHumidity = values[0];
-      maxHumidity = values[1];
-      updateData();
-    }
-
-    function windChanged(obj, value) {
-      var values = value.split(",");
-      minWind = values[0];
-      maxWind = values[1];
-      updateData();
-    }
+    //handle scales
+    var xScale = d3.scale.linear()
+              .domain([1,10])
+              .range([margin.left, width-margin.right]);
+    var yScale = d3.scale.linear()
+              .domain([2,10])
+              .range([height-margin.bottom, margin.top]);
 
     /** Queries database and displays points **/
     function updateData() {
@@ -127,34 +161,62 @@
           }
         }
 
-        //handle scales
-        var xScale = d3.scale.linear()
-                      .domain(
-                        [d3.min(data, function(d) { return d.X; }),
-                         d3.max(data, function(d) { return d.X; })]
-                      )
-                      .range([margin.left, width-margin.right]);
-        //handle scales
-        var yScale = d3.scale.linear()
-                      .domain(
-                        [d3.min(data, function(d) { return d.Y; }),
-                         d3.max(data, function(d) { return d.Y; })]
-                      )
-                      .range([margin.top, height-margin.bottom]);
-
         //append circles
         var circ = svg.selectAll("circle")
           .data(data, function(d) { return d.X +"/"+ d.Y; })
         circ.enter()
           .append("circle")
+          .attr("fill", "lightcoral")
           .attr("cx", function(d) { return xScale(d.X); })
           .attr("cy", function(d) { return yScale(d.Y); })
-          .attr("fill", "lightcoral")
-          .attr("r", 0);
-        circ.transition()
-          .attr("r", function(d) {return 5 + Math.pow(d.weight, 0.5)});
+          .attr("r", 0)
+          .on({
+            "mouseover" : hover,
+            "mouseout" : hoverOff
+            })
+        circ.moveToFront().transition()
+          .attr("cx", function(d) { return xScale(d.X); })
+          .attr("cy", function(d) { return yScale(d.Y); })
+          .attr("r", function(d) {return 3 + Math.pow(d.weight, 0.8)});
         circ.exit().transition().attr("r", 0).remove();
       });
+    }
+
+    /** Listeners for hover **/
+    function hover (datum) {
+      tooltip.style("visibility", "visible")
+          .style("top", (d3.event.pageY-10)+"px")
+          .style("left",(d3.event.pageX+15)+"px")
+            .text("X: " + datum.X + ", Y: " + datum.Y + ", Occurences: " + datum.weight)
+            .style("opacity", 0)
+            .transition()
+          .style("opacity", 1);
+    }
+
+    function hoverOff(datum) {
+      tooltip.style("visibility", "hidden");
+    }
+
+    /** Listeners for sliders **/
+    function tempChanged(obj, value) {
+      var values = value.split(",");
+      minTemp = values[0];
+      maxTemp = values[1];
+      updateData();
+    }
+
+    function humidityChanged(obj, value) {
+      var values = value.split(",");
+      minHumidity = values[0];
+      maxHumidity = values[1];
+      updateData();
+    }
+
+    function windChanged(obj, value) {
+      var values = value.split(",");
+      minWind = values[0];
+      maxWind = values[1];
+      updateData();
     }
   </script>
 </body>

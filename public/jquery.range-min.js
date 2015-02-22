@@ -147,6 +147,7 @@
 					this.pointers.first() : this.pointers.last();
 				this.setPosition(pointer, x, true, true);
 			}
+			this.options.onstatechange(this, this.options.value);
 		},
 		onChange: function(e, self, pointer, position) {
 			var min, max;

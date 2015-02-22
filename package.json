@@ -10,6 +10,6 @@
   },
   "main": "server.js",
   "devDependencies": {},
-  "author": "",
+  "author": "Jason Whitehouse",
   "license": "ISC"
 }

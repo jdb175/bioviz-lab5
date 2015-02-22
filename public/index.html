@@ -3,6 +3,66 @@
 <style>
 </style>
 <body>
-  hi
+  <svg></svg>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script>
+    var width = 800;
+    var height = 800;
+    var margin = { left: 20, right:20, top:20, bottom: 20};
+    var svg = d3.select("svg").attr("width", width).attr("height", height)
+
+    updateData();
+    function updateData() {
+      d3.json("/points")
+      .header("Content-Type", "application/json")
+      .get(function(error, data) {
+        // callback
+        if(error) {
+          console.log(error);
+          return;
+        }
+        console.log(data[0]);
+
+        //combine overlapping data
+        for(var i = 0; i < data.length-1; ++i) {
+          data[i].weight = 1;
+          for(var j = i+1; j < data.length; ++j) {
+            //combine data points;
+            if(data[i].X == data[j].X && data[i].Y == data[j].Y){
+              data[i].weight++;
+              data.splice(j, 1);
+              --j;
+            }
+          }
+        }
+
+        //handle scales
+        var xScale = d3.scale.linear()
+                      .domain(
+                        [d3.min(data, function(d) { return d.X; }),
+                         d3.max(data, function(d) { return d.X; })]
+                      )
+                      .range([margin.left, width-margin.right]);
+        //handle scales
+        var yScale = d3.scale.linear()
+                      .domain(
+                        [d3.min(data, function(d) { return d.Y; }),
+                         d3.max(data, function(d) { return d.Y; })]
+                      )
+                      .range([margin.top, height-margin.bottom]);
+
+        //append circles
+        var circ = svg.selectAll("circle")
+          .data(data, function(d) { return d.id; })
+        circ.enter()
+          .append("circle")
+          .attr("cx", function(d) { return xScale(d.X); })
+          .attr("cy", function(d) { return yScale(d.Y); })
+          .attr("fill", "lightcoral")
+          .attr("r", function(d) {return Math.pow(d.weight, 0.5) * 2});
+        circ.exit().remove();
+      });
+    }
+  </script>
 </body>
 </script>

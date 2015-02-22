@@ -1,18 +1,19 @@
 var express = require('express');
+var mysql = require('mysql');
 var app = express();
 app.use(express.static(__dirname + '/public'));
 
-var mysql      = require('mysql');
-var connection = mysql.createConnection({
-  host     : 'dev.codementum.org',
-  database : 'firefinder',
-  user     : 'wpi',
-  password : 'wpiwpi'
-});
-
-connection.connect();
 
 app.get('/points', function (req, res) {
+	//Connect
+	var connection = mysql.createConnection({
+	  host     : 'dev.codementum.org',
+	  database : 'firefinder',
+	  user     : 'wpi',
+	  password : 'wpiwpi'
+	});
+
+	connection.connect();
 	//just using the give ranges
 	var minTemp = req.query.minTemp == undefined ? '2.2' : req.query.minTemp;
 	var maxTemp = req.query.maxTemp == undefined ? '33.0' : req.query.maxTemp;
@@ -30,12 +31,11 @@ app.get('/points', function (req, res) {
 
 	connection.query(query, function(err, rows, fields) {
 		if (err) throw err;
-		console.log(rows);
 		res.send(rows);
 	});
+	connection.end();
 })
 
-//connection.end();
 
 var server = app.listen(3000, function () {
 
